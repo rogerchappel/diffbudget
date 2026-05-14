@@ -6,6 +6,7 @@ import { diffFromGit, isGitRepo } from "./git.js";
 import { readDiffFile, writeReportFiles, writeTextFile } from "./io.js";
 import { parseUnifiedDiff } from "./diffParser.js";
 import { buildReport, renderMarkdown } from "./report.js";
+import { oneLineSummary } from "./summary.js";
 
 export const VERSION = "0.1.0";
 
@@ -38,7 +39,7 @@ export async function runCommand(parsed: ParsedArgs, cwd = process.cwd()): Promi
     const files = await writeReportFiles(report, output);
     const format = stringFlag(parsed.flags, "format") ?? "markdown";
     const stdout = format === "json" ? `${JSON.stringify(report, null, 2)}\n` : renderMarkdown(report);
-    const summary = `\nWrote ${files.json}\nWrote ${files.markdown}\n`;
+    const summary = `\n${oneLineSummary(report)}\nWrote ${files.json}\nWrote ${files.markdown}\n`;
     const strict = boolFlag(parsed.flags, "strict");
     return { code: strict && report.status === "fail" ? 2 : 0, stdout: `${stdout}${summary}`, stderr: "" };
   }
