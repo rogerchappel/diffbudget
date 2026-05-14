@@ -1,5 +1,6 @@
 import type { DiffBudgetConfig, DiffBudgetReport, FileChange } from "./types.js";
 import { hasTestChange, scoreFile } from "./risk.js";
+import { matchesAny } from "./glob.js";
 import { redactPath } from "./redact.js";
 
 export function buildReport(input: {
@@ -10,7 +11,7 @@ export function buildReport(input: {
   version: string;
   now?: Date;
 }): DiffBudgetReport {
-  const relevant = input.changes.filter((change) => change.path.length > 0);
+  const relevant = input.changes.filter((change) => change.path.length > 0 && !matchesAny(change.path, input.config.patterns.ignorePaths));
   const testChange = hasTestChange(relevant, input.config);
   const files = relevant.map((change) => scoreFile(change, input.config, testChange));
   const additions = relevant.reduce((sum, change) => sum + change.additions, 0);
