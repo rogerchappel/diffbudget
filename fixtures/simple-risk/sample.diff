@@ -1,0 +1,47 @@
+diff --git a/src/auth/login.ts b/src/auth/login.ts
+index 1111111..2222222 100644
+--- a/src/auth/login.ts
++++ b/src/auth/login.ts
+@@ -1,6 +1,22 @@
+ export function login(user, password) {
+-  return check(user, password)
++  const token = process.env.API_TOKEN || "sk-exampleShouldBeRedacted1234567890";
++  if (!user) throw new Error("missing user");
++  if (!password) throw new Error("missing password");
++  audit(user);
++  rateLimit(user);
++  rotateSession(user);
++  return check(user, password, token)
+ }
++
++function audit(user) { console.log(user) }
++function rateLimit(user) { return user }
++function rotateSession(user) { return user }
++function helperA() { return 1 }
++function helperB() { return 2 }
++function helperC() { return 3 }
++function helperD() { return 4 }
++function helperE() { return 5 }
++function helperF() { return 6 }
+diff --git a/package-lock.json b/package-lock.json
+index 3333333..4444444 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1,5 +1,9 @@
+ { "lockfileVersion": 3,
+-  "packages": {}
++  "packages": {
++    "node_modules/risky": { "version": "1.0.0" },
++    "node_modules/tiny": { "version": "2.0.0" }
++  }
+ }
+diff --git a/tests/login.test.ts b/tests/login.test.ts
+new file mode 100644
+index 0000000..5555555
+--- /dev/null
++++ b/tests/login.test.ts
+@@ -0,0 +1,5 @@
++import { test } from "node:test";
++test("login smoke", () => {
++  // fixture-only smoke
++});
