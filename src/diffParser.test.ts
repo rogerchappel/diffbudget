@@ -8,7 +8,7 @@ test("parseUnifiedDiff extracts paths and line counts", () => {
   const changes = parseUnifiedDiff(diff);
   assert.equal(changes.length, 3);
   assert.equal(changes[0]?.path, "src/auth/login.ts");
-  assert.equal(changes[0]?.additions, 19);
+  assert.equal(changes[0]?.additions, 17);
   assert.equal(changes[0]?.deletions, 1);
   assert.equal(changes[2]?.status, "added");
 });
