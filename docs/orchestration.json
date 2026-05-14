@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "tool": "diffbudget",
+  "defaultGate": {
+    "command": "diffbudget scan --base HEAD --output .diffbudget/latest --strict",
+    "report": ".diffbudget/latest/diffbudget-report.md",
+    "json": ".diffbudget/latest/diffbudget-report.json"
+  },
+  "exitCodes": {
+    "0": "success",
+    "1": "command or environment error",
+    "2": "strict budget failure"
+  },
+  "network": "never required"
+}
