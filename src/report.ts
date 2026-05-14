@@ -1,6 +1,7 @@
 import type { DiffBudgetConfig, DiffBudgetReport, FileChange } from "./types.js";
 import { hasTestChange, scoreFile } from "./risk.js";
 import { matchesAny } from "./glob.js";
+import { statusForRisk } from "./status.js";
 import { redactPath } from "./redact.js";
 
 export function buildReport(input: {
@@ -24,7 +25,7 @@ export function buildReport(input: {
   if (changedLines > input.config.budgets.maxChangedLines) findings.push(`changed lines ${changedLines} exceeds budget ${input.config.budgets.maxChangedLines}`);
   if (riskScore > input.config.budgets.maxRiskScore) findings.push(`risk score ${riskScore} exceeds budget ${input.config.budgets.maxRiskScore}`);
 
-  const status = findings.length > 0 ? "fail" : riskScore >= input.config.budgets.warnRiskScore ? "warn" : "pass";
+  const status = statusForRisk(riskScore, findings, input.config.budgets);
   return {
     tool: "diffbudget",
     version: input.version,
