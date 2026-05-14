@@ -56,3 +56,9 @@ Out of scope:
 ## Disclosure
 
 Coordinate disclosure with maintainers before publishing vulnerability details.
+## DiffBudget safety notes
+
+DiffBudget does not need network access for `init`, `scan`, `report`, or `doctor`. Please report any accidental secret exposure, unsafe path handling, or unexpected network behavior as a security issue.
+
+Reports should be reviewed before sharing outside a private team, especially when custom configuration disables redaction.
+
