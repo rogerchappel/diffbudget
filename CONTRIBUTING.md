@@ -77,3 +77,10 @@ If verification cannot be run, explain why and provide the exact command maintai
 ## Maintainer Review
 
 Maintainers may request narrower scope, clearer verification, additional tests, or safer defaults before merging.
+## DiffBudget contribution bar
+
+- Add or update a fixture when changing scoring behavior.
+- Keep the CLI local-first; do not add network calls to the scan path.
+- Run `npm test`, `npm run check`, `npm run build`, `npm run smoke`, and `bash scripts/validate.sh` before review.
+- Prefer small commits that explain the risk model change.
+
