@@ -28,6 +28,9 @@ npx diffbudget init
 # score uncommitted changes against HEAD
 npx diffbudget scan --base HEAD --output .diffbudget/latest
 
+# short alias for the same CLI
+npx dbudget scan --base HEAD --output .diffbudget/latest
+
 # fail with exit code 2 when the patch exceeds budget
 npx diffbudget scan --base HEAD --strict
 
@@ -105,6 +108,8 @@ npm test
 npm run check
 npm run build
 npm run smoke
+npm run package:smoke
+npm run release:check
 bash scripts/validate.sh
 ```
 
