@@ -43,10 +43,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rogerchappel/undefined.git"
+    "url": "git+https://github.com/rogerchappel/diffbudget.git"
   },
   "bugs": {
-    "url": "https://github.com/rogerchappel/undefined/issues"
+    "url": "https://github.com/rogerchappel/diffbudget/issues"
   },
-  "homepage": "https://github.com/rogerchappel/undefined#readme"
+  "homepage": "https://github.com/rogerchappel/diffbudget#readme"
 }
