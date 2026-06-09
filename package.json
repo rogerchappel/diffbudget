@@ -4,8 +4,8 @@
   "description": "Local patch risk budgets before a commit escapes.",
   "type": "module",
   "bin": {
-    "diffbudget": "./dist/cli.js",
-    "dbudget": "./dist/cli.js"
+    "diffbudget": "dist/cli.js",
+    "dbudget": "dist/cli.js"
   },
   "main": "./dist/index.js",
   "exports": {
@@ -14,7 +14,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "SECURITY.md"
   ],
   "scripts": {
     "build": "tsc",
