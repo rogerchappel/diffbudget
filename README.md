@@ -117,6 +117,19 @@ bash scripts/validate.sh
 
 Keep changes small, local-first, and fixture-backed. See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
 
+## Development
+
+Use Node.js 20 or newer. Run these checks before opening a PR:
+
+```sh
+npm run build
+npm run check
+npm test
+npm run smoke
+npm run package:smoke
+npm run release:check
+```
+
 ## License
 
 MIT
