@@ -64,6 +64,16 @@ diffbudget scan --base HEAD --output .diffbudget/latest --strict
 cat .diffbudget/latest/diffbudget-report.md
 ```
 
+## CLI options
+
+- `init`: `--force`
+- `scan`: `--base`, `--target`, `--diff`, `--config`, `--output`, `--format markdown|json`, `--strict`
+- `report`: `--input`, `--output`, `--format markdown|json`
+- `doctor`: `--config`
+
+Boolean options (`--force` and `--strict`) do not take values. Unknown options,
+missing values, and formats other than `markdown` or `json` exit with an error.
+
 Tune budgets in `diffbudget.config.json`:
 
 ```json
