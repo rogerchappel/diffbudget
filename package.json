@@ -22,11 +22,13 @@
   ],
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
     "check": "tsc --noEmit",
     "test": "npm run build && node --test dist/*.test.js",
     "smoke": "bash scripts/smoke.sh",
+    "install:smoke": "bash scripts/install-smoke.sh",
     "package:smoke": "npm run build && node scripts/package-smoke.mjs",
-    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke",
+    "release:check": "npm run check && npm test && npm run smoke && npm run install:smoke && npm run package:smoke",
     "lint": "npm run check"
   },
   "keywords": [
