@@ -69,3 +69,58 @@ test("runCommand reports logical paths from a real Git diff", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("runCommand includes reviewable untracked files in worktree scans", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "diffbudget-git-worktree-"));
+  const git = (args: string[]) => execFileSync("git", args, { cwd: dir, encoding: "utf8" });
+  const output = join(dir, "scan-output");
+
+  try {
+    git(["init", "--quiet"]);
+    git(["config", "user.name", "DiffBudget Test"]);
+    git(["config", "user.email", "test@example.com"]);
+    await writeFile(join(dir, ".gitignore"), "ignored.txt\n");
+    await writeFile(join(dir, "tracked.txt"), "base\n");
+    await writeFile(join(dir, "staged.txt"), "base\n");
+    git(["add", "."]);
+    git(["commit", "--quiet", "-m", "base"]);
+
+    await writeFile(join(dir, "tracked.txt"), "base\nunstaged\n");
+    await writeFile(join(dir, "staged.txt"), "base\nstaged\n");
+    git(["add", "staged.txt"]);
+    await writeFile(join(dir, "untracked.ts"), "export const token = process.env.SECRET;\n");
+    await writeFile(join(dir, "binary.dat"), Uint8Array.from([0, 1, 2, 3]));
+    await writeFile(join(dir, "empty.txt"), "");
+    await writeFile(join(dir, "ignored.txt"), "ignored\n");
+
+    const scan = async () => {
+      const result = await runCommand(parseArgs([
+        "scan",
+        "--base", "HEAD",
+        "--output", output,
+        "--format", "json"
+      ]), dir);
+      assert.equal(result.code, 0);
+      return JSON.parse(await readFile(join(output, "diffbudget-report.json"), "utf8")) as {
+        totals: { files: number; additions: number };
+        files: Array<{ file: { path: string; status: string; additions: number; binary?: boolean } }>;
+      };
+    };
+
+    const first = await scan();
+    const second = await scan();
+    const files = new Map(second.files.map(({ file }) => [file.path, file]));
+
+    assert.equal(first.totals.files, 5);
+    assert.equal(second.totals.files, 5);
+    assert.deepEqual([...files.keys()].sort(), ["binary.dat", "empty.txt", "staged.txt", "tracked.txt", "untracked.ts"]);
+    assert.equal(files.get("untracked.ts")?.status, "added");
+    assert.equal(files.get("untracked.ts")?.additions, 1);
+    assert.deepEqual(files.get("empty.txt"), { path: "empty.txt", status: "added", additions: 0, deletions: 0 });
+    assert.equal(files.get("binary.dat")?.binary, true);
+    assert.equal(files.has("ignored.txt"), false);
+    assert.equal([...files.keys()].some((path) => path.startsWith("scan-output/")), false);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
