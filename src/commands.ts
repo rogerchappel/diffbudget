@@ -11,7 +11,7 @@ import { oneLineSummary } from "./summary.js";
 export const VERSION = "0.1.0";
 
 export function helpText(): string {
-  return `DiffBudget — local patch risk budgets before a commit escapes\n\nUsage:\n  diffbudget init [--force]\n  diffbudget scan [--base HEAD] [--target main] [--diff file.patch] [--config file] [--output .diffbudget/latest] [--format markdown|json] [--strict]\n  diffbudget report [--input .diffbudget/latest/diffbudget-report.json] [--format markdown|json]\n  diffbudget doctor\n\nExamples:\n  diffbudget init\n  diffbudget scan --base HEAD --strict\n  diffbudget scan --diff fixtures/simple-risk/sample.diff --output .diffbudget/sample
+  return `DiffBudget — local patch risk budgets before a commit escapes\n\nUsage:\n  diffbudget init [--force]\n  diffbudget scan [--base HEAD] [--target main] [--diff file.patch] [--config file] [--output .diffbudget/latest] [--format markdown|json] [--strict]\n  diffbudget report [--input .diffbudget/latest/diffbudget-report.json] [--format markdown|json]\n  diffbudget doctor\n\nScan semantics:\n  Without --target, scan tracked changes against --base plus non-ignored untracked files.\n  With --target, scan only the committed --base..--target range. The output directory is excluded.\n\nExamples:\n  diffbudget init\n  diffbudget scan --base HEAD --strict\n  diffbudget scan --diff fixtures/simple-risk/sample.diff --output .diffbudget/sample
   diffbudget scan --base origin/main --target HEAD --format json\n`;
 }
 
