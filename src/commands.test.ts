@@ -31,6 +31,26 @@ test("CLI rejects invalid argument shapes before creating output", async () => {
   }
 });
 
+test("CLI rejects an invalid numeric budget before creating output", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "diffbudget-cli-config-"));
+  const output = join(dir, "out");
+  const config = join(dir, "config.json");
+  const fixture = join(process.cwd(), "fixtures/simple-risk/sample.diff");
+
+  try {
+    await writeFile(config, JSON.stringify({ budgets: { maxFiles: "not-a-number" } }));
+    const result = spawnSync(process.execPath, [
+      join(process.cwd(), "dist/cli.js"), "scan", "--diff", fixture,
+      "--config", config, "--output", output, "--format", "json"
+    ], { cwd: dir, encoding: "utf8" });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /budgets\.maxFiles must be a finite non-negative number/);
+    await assert.rejects(access(output));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("runCommand scans a fixture diff", async () => {
   const dir = await mkdtemp(join(tmpdir(), "diffbudget-command-"));
   try {
