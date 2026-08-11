@@ -15,6 +15,8 @@ format and uses semantic versioning when versioned releases are published.
 
 - Decode Git-quoted modification and rename paths so scans, path patterns, and
   reports use the actual filename.
+- Reject malformed runtime configuration values instead of silently bypassing
+  numeric budgets, and honor workspace redaction settings in generated reports.
 
 ## Release Links
 

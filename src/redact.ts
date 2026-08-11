@@ -6,7 +6,7 @@ const SECRET_PATTERNS: RegExp[] = [
   /(?<key>(?:token|secret|password|api[_-]?key)\s*[:=]\s*)['\"]?[^'\"\s]+/gi
 ];
 
-export function redactText(input: string, home = process.env.HOME): string {
+export function redactText(input: string, home: string | null | undefined = process.env.HOME): string {
   let output = input;
   for (const pattern of SECRET_PATTERNS) {
     output = output.replace(pattern, (...args: unknown[]) => {
@@ -20,6 +20,8 @@ export function redactText(input: string, home = process.env.HOME): string {
   return output;
 }
 
-export function redactPath(path: string): string {
-  return redactText(path).replaceAll("\\", "/");
+export function redactPath(path: string, options: { enabled?: boolean; redactHome?: boolean } = {}): string {
+  if (options.enabled === false) return path;
+  const home = options.redactHome === false ? null : process.env.HOME;
+  return redactText(path, home).replaceAll("\\", "/");
 }

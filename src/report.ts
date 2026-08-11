@@ -30,7 +30,7 @@ export function buildReport(input: {
     tool: "diffbudget",
     version: input.version,
     generatedAt: (input.now ?? new Date()).toISOString(),
-    workspace: redactPath(input.workspace),
+    workspace: redactPath(input.workspace, input.config.redaction),
     source: input.source,
     status,
     totals: { files: relevant.length, additions, deletions, changedLines, riskScore },
