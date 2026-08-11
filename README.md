@@ -96,6 +96,12 @@ Tune budgets in `diffbudget.config.json`:
 }
 ```
 
+Config sections are optional and merge with the defaults. Supplied budgets and
+weights must be finite non-negative numbers, patterns must be arrays of strings,
+and redaction settings must be booleans. See
+[docs/CONFIG.md](docs/CONFIG.md) for the complete constraints and redaction
+behavior.
+
 ## What it scores
 
 - number of changed files and changed lines
