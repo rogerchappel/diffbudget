@@ -11,10 +11,19 @@ type ConfigInput = {
   redaction?: Record<string, unknown>;
 };
 
+const rootKeys = ["schemaVersion", "budgets", "weights", "patterns", "redaction"] as const;
 const budgetKeys = ["maxFiles", "maxChangedLines", "maxRiskScore", "warnRiskScore"] as const;
 const weightKeys = ["baseFile", "changedLine", "riskyPath", "generatedPath", "dependencyFile", "missingTests", "binaryFile", "deletionHeavy"] as const;
 const patternKeys = ["riskyPaths", "generatedPaths", "dependencyFiles", "testPaths", "ignorePaths"] as const;
 const redactionKeys = ["enabled", "redactHome"] as const;
+
+function rejectUnknownKeys(value: Record<string, unknown>, keys: readonly string[], path: string): void {
+  const allowed = new Set(keys);
+  const unknown = Object.keys(value).find((key) => !allowed.has(key));
+  if (unknown !== undefined) {
+    throw new Error(`Invalid config: unknown key ${path}.${unknown}`);
+  }
+}
 
 function objectAt(value: unknown, path: string): Record<string, unknown> | undefined {
   if (value === undefined) return undefined;
@@ -27,6 +36,7 @@ function objectAt(value: unknown, path: string): Record<string, unknown> | undef
 function validateConfig(value: unknown): ConfigInput {
   const input = objectAt(value, "config root");
   if (!input) throw new Error("Invalid config: config root must be an object");
+  rejectUnknownKeys(input, rootKeys, "config root");
 
   if (input.schemaVersion !== undefined && input.schemaVersion !== 1) {
     throw new Error(`Unsupported config schemaVersion: ${String(input.schemaVersion)}`);
@@ -36,6 +46,15 @@ function validateConfig(value: unknown): ConfigInput {
   const weights = objectAt(input.weights, "weights");
   const patterns = objectAt(input.patterns, "patterns");
   const redaction = objectAt(input.redaction, "redaction");
+
+  for (const [group, keys, path] of [
+    [budgets, budgetKeys, "budgets"],
+    [weights, weightKeys, "weights"],
+    [patterns, patternKeys, "patterns"],
+    [redaction, redactionKeys, "redaction"]
+  ] as const) {
+    if (group) rejectUnknownKeys(group, keys, path);
+  }
 
   for (const [group, keys] of [[budgets, budgetKeys], [weights, weightKeys]] as const) {
     for (const key of keys) {
