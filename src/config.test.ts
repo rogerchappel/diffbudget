@@ -43,6 +43,28 @@ test("loadConfig rejects malformed root and nested values with actionable paths"
   }
 });
 
+test("loadConfig rejects unknown root and nested keys with fully-qualified paths", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "diffbudget-config-unknown-"));
+  const path = join(dir, "config.json");
+
+  try {
+    const cases: Array<[unknown, RegExp]> = [
+      [{ budget: { maxFiles: 12 } }, /config root\.budget/],
+      [{ budgets: { maxFile: 12 } }, /budgets\.maxFile/],
+      [{ weights: { changedLines: 0.25 } }, /weights\.changedLines/],
+      [{ patterns: { riskyPath: ["server\/\*\*"] } }, /patterns\.riskyPath/],
+      [{ redaction: { enable: false } }, /redaction\.enable/]
+    ];
+
+    for (const [value, expected] of cases) {
+      await writeFile(path, JSON.stringify(value));
+      await assert.rejects(loadConfig(dir, path), expected);
+    }
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("loadConfig accepts validated partial nested overrides", async () => {
   const dir = await mkdtemp(join(tmpdir(), "diffbudget-config-partial-"));
   const path = join(dir, "config.json");
