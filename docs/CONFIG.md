@@ -5,13 +5,17 @@ Run `diffbudget init` to create `diffbudget.config.json`.
 Configuration files must contain a JSON object. Every section is optional and
 is merged with the defaults, but supplied values are validated before a scan:
 
+- Only the documented keys are accepted at the root and within `budgets`,
+  `weights`, `patterns`, and `redaction`. Misspellings stop the command with the
+  full unknown-key path, such as `budgets.maxFile`.
 - `schemaVersion`, when present, must be `1`.
 - Budget and weight values must be finite, non-negative JSON numbers.
 - Pattern values must be arrays containing only strings.
 - `redaction.enabled` and `redaction.redactHome` must be booleans.
 
-Invalid values stop `scan` and `doctor` with the full property path in the
-error, before reports are written.
+Unknown keys and invalid values stop `scan` and `doctor` with the full property
+path in the error, before reports are written. Partial configurations remain
+valid when every supplied key is documented.
 
 ## Budgets
 
