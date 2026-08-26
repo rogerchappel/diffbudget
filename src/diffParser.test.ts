@@ -32,6 +32,54 @@ test("parseUnifiedDiff decodes Git-quoted modification paths", () => {
   }]);
 });
 
+test("parseUnifiedDiff counts hunk content lines beginning with -- or ++", () => {
+  const diff = [
+    "diff --git a/t.md b/t.md",
+    "index 1234567..89abcde 100644",
+    "--- a/t.md",
+    "+++ b/t.md",
+    "@@ -1,5 +1,5 @@",
+    " keep",
+    "--- dashed",
+    "-++ plus",
+    "---- triple",
+    " keep2",
+    "+-- dashed2",
+    "+++ plus2",
+    "+--- triple2"
+  ].join("\n");
+
+  assert.deepEqual(parseUnifiedDiff(diff), [{
+    path: "t.md",
+    status: "modified",
+    additions: 3,
+    deletions: 3
+  }]);
+});
+
+test("parseUnifiedDiff counts --/++-prefixed content in untracked no-index shapes", () => {
+  const diff = [
+    "diff --git a/dev/null b/t.md",
+    "new file mode 100644",
+    "index 0000000..1234567",
+    "--- /dev/null",
+    "+++ b/t.md",
+    "@@ -0,0 +1,5 @@",
+    "+keep",
+    "+-- dashed",
+    "+++ plus",
+    "+--- triple",
+    "+keep2"
+  ].join("\n");
+
+  assert.deepEqual(parseUnifiedDiff(diff), [{
+    path: "t.md",
+    status: "added",
+    additions: 5,
+    deletions: 0
+  }]);
+});
+
 test("parseUnifiedDiff preserves ordinary spaces and decodes quoted renames", () => {
   const diff = [
     "diff --git a/ordinary space.txt b/ordinary space.txt",
