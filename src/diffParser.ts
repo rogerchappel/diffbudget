@@ -87,12 +87,14 @@ function pathFromDiffHeader(line: string): string {
 export function parseUnifiedDiff(text: string): FileChange[] {
   const byPath = new Map<string, FileChange>();
   let current: FileChange | undefined;
+  let inHunk = false;
 
   for (const line of text.split(/\r?\n/)) {
     if (line.startsWith("diff --git ")) {
       const path = pathFromDiffHeader(line);
       current = emptyChange(stripPrefix(path));
       byPath.set(current.path, current);
+      inHunk = false;
       continue;
     }
     if (!current) continue;
@@ -118,9 +120,16 @@ export function parseUnifiedDiff(text: string): FileChange[] {
       current.status = "binary";
       continue;
     }
-    if (line.startsWith("+++") || line.startsWith("---")) continue;
-    if (line.startsWith("+") && !line.startsWith("+++")) current.additions += 1;
-    if (line.startsWith("-") && !line.startsWith("---")) current.deletions += 1;
+    // "---"/"+++" lines are file headers only before the first hunk
+    // header; inside a hunk every "+"/"-"-prefixed line is content,
+    // including lines whose text itself begins with "--"/"++".
+    if (line.startsWith("@@")) {
+      inHunk = true;
+      continue;
+    }
+    if (!inHunk) continue;
+    if (line.startsWith("+")) current.additions += 1;
+    else if (line.startsWith("-")) current.deletions += 1;
   }
 
   return [...byPath.values()];
