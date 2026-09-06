@@ -80,6 +80,17 @@ function pathFromDiffHeader(line: string): string {
     }
   }
 
+  // Spaces do not make Git quote a path, so the separator can also occur
+  // inside a name such as "dir b/name.txt". For the common modification
+  // shape, identify the boundary whose a/ and b/ paths are identical.
+  let separator = header.indexOf(" b/", 2);
+  while (separator !== -1) {
+    const oldPath = header.slice(2, separator);
+    const newPath = header.slice(separator + 3);
+    if (oldPath === newPath) return newPath;
+    separator = header.indexOf(" b/", separator + 1);
+  }
+
   const match = /^a\/(.*) b\/(.*)$/.exec(header);
   return match ? match[2] : header.trim();
 }
