@@ -144,6 +144,51 @@ test("runCommand reports logical paths from a real Git diff", async () => {
   }
 });
 
+test("runCommand preserves a real Git path containing the diff header separator", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "diffbudget-git-ambiguous-path-"));
+  const changedPath = "dir b/name.txt";
+  const git = (args: string[]) => execFileSync("git", args, { cwd: dir, encoding: "utf8" });
+
+  try {
+    git(["init", "--quiet"]);
+    git(["config", "user.name", "DiffBudget Test"]);
+    git(["config", "user.email", "test@example.com"]);
+    await mkdir(join(dir, "dir b"));
+    await writeFile(join(dir, changedPath), "before\n");
+    git(["add", "."]);
+    git(["commit", "--quiet", "-m", "base"]);
+    await writeFile(join(dir, changedPath), "before\nafter\n");
+
+    const result = await runCommand(parseArgs([
+      "scan",
+      "--base", "HEAD",
+      "--output", join(dir, "report"),
+      "--format", "json"
+    ]), dir);
+    const report = JSON.parse(await readFile(join(dir, "report", "diffbudget-report.json"), "utf8")) as {
+      totals: { files: number; additions: number; deletions: number; changedLines: number };
+      files: Array<{ file: { path: string; additions: number; deletions: number } }>;
+    };
+
+    assert.equal(result.code, 0);
+    assert.deepEqual(report.totals, {
+      files: 1,
+      additions: 1,
+      deletions: 0,
+      changedLines: 1,
+      riskScore: 2.1
+    });
+    assert.deepEqual(report.files.map(({ file }) => file), [{
+      path: changedPath,
+      status: "modified",
+      additions: 1,
+      deletions: 0
+    }]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("runCommand includes reviewable untracked files in worktree scans", async () => {
   const dir = await mkdtemp(join(tmpdir(), "diffbudget-git-worktree-"));
   const git = (args: string[]) => execFileSync("git", args, { cwd: dir, encoding: "utf8" });

@@ -111,3 +111,22 @@ test("parseUnifiedDiff preserves ordinary spaces and decodes quoted renames", ()
     }
   ]);
 });
+
+test("parseUnifiedDiff preserves an unquoted path containing the header separator", () => {
+  const diff = [
+    "diff --git a/dir b/name.txt b/dir b/name.txt",
+    "index 1234567..89abcde 100644",
+    "--- a/dir b/name.txt",
+    "+++ b/dir b/name.txt",
+    "@@ -1 +1,2 @@",
+    " before",
+    "+after"
+  ].join("\n");
+
+  assert.deepEqual(parseUnifiedDiff(diff), [{
+    path: "dir b/name.txt",
+    status: "modified",
+    additions: 1,
+    deletions: 0
+  }]);
+});
