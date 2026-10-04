@@ -59,6 +59,7 @@ jobs:
 
           if [ -f package-lock.json ]; then
             npm ci
+            npm audit --audit-level=high --package-lock-only
           else
             npm install
           fi
