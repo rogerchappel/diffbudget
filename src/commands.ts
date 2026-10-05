@@ -11,7 +11,7 @@ import { oneLineSummary } from "./summary.js";
 export const VERSION = "0.1.0";
 
 export function helpText(): string {
-  return `DiffBudget — local patch risk budgets before a commit escapes\n\nUsage:\n  diffbudget init [--force]\n  diffbudget scan [--base HEAD] [--target main] [--diff file.patch] [--config file] [--output .diffbudget/latest] [--format markdown|json] [--strict]\n  diffbudget report [--input .diffbudget/latest/diffbudget-report.json] [--format markdown|json]\n  diffbudget doctor\n\nScan semantics:\n  Without --target, scan tracked changes against --base plus non-ignored untracked files.\n  With --target, scan only the committed --base..--target range. The output directory is excluded.\n\nExamples:\n  diffbudget init\n  diffbudget scan --base HEAD --strict\n  diffbudget scan --diff fixtures/simple-risk/sample.diff --output .diffbudget/sample
+  return `DiffBudget — local patch risk budgets before a commit escapes\n\nUsage:\n  diffbudget init [--force]\n  diffbudget scan [--base HEAD] [--target main] [--diff file.patch] [--config file] [--output .diffbudget/latest] [--format markdown|json] [--strict] [--overwrite]\n  diffbudget report [--input .diffbudget/latest/diffbudget-report.json] [--format markdown|json]\n  diffbudget doctor\n\nScan semantics:\n  Without --target, scan tracked changes against --base plus non-ignored untracked files.\n  With --target, scan only the committed --base..--target range. The output directory is excluded.\n\nExamples:\n  diffbudget init\n  diffbudget scan --base HEAD --strict\n  diffbudget scan --diff fixtures/simple-risk/sample.diff --output .diffbudget/sample
   diffbudget scan --base origin/main --target HEAD --format json\n`;
 }
 
@@ -37,7 +37,7 @@ export async function runCommand(parsed: ParsedArgs, cwd = process.cwd()): Promi
     const source = diffPath ? await readDiffFile(diffPath) : await diffFromGit(cwd, stringFlag(parsed.flags, "base") ?? "HEAD", stringFlag(parsed.flags, "target"), output);
     const changes = parseUnifiedDiff(source.text);
     const report = buildReport({ changes, config, workspace: cwd, source: source.label, version: VERSION });
-    const files = await writeReportFiles(report, output);
+    const files = await writeReportFiles(report, output, boolFlag(parsed.flags, "overwrite"));
     const format = stringFlag(parsed.flags, "format") ?? "markdown";
     const stdout = format === "json" ? `${JSON.stringify(report, null, 2)}\n` : renderMarkdown(report);
     const summary = `\n${oneLineSummary(report)}\nWrote ${files.json}\nWrote ${files.markdown}\n`;
