@@ -32,7 +32,8 @@
     "package:smoke": "npm run build && node scripts/package-smoke.mjs",
     "release:tag-check": "node scripts/check-release-tag.mjs",
     "release:check": "npm run check && npm test && npm run smoke && npm run install:smoke && npm run package:smoke",
-    "lint": "npm run check"
+    "lint": "npm run check",
+    "audit:dependencies": "bash scripts/audit-dependencies.sh"
   },
   "keywords": [
     "git",
