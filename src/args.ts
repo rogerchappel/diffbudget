@@ -55,7 +55,9 @@ export function parseArgs(argv: string[]): ParsedArgs {
       throw new Error(`Option --${key} may only be specified once`);
     }
     if (kind === "boolean") {
-      if (inlineValue !== undefined || (tail[index + 1] && !tail[index + 1].startsWith("--"))) {
+      const next = tail[index + 1];
+      const nextKey = next?.startsWith("--") ? next.slice(2).split("=", 1)[0] : undefined;
+      if (inlineValue !== undefined || (next !== undefined && (!next.startsWith("--") || !Object.hasOwn(options, nextKey!)))) {
         throw new Error(`Option --${key} does not accept a value`);
       }
       flags[key] = true;

@@ -56,6 +56,14 @@ test("parseArgs rejects unsupported output formats", () => {
   );
 });
 
+test("parseArgs accepts a boolean followed by another recognized option", () => {
+  assert.deepEqual(parseArgs(["scan", "--strict", "--base", "HEAD"]), {
+    command: "scan",
+    flags: { strict: true, base: "HEAD" },
+    rest: []
+  });
+});
+
 test("parseArgs rejects values supplied to boolean options", () => {
   assert.throws(
     () => parseArgs(["scan", "--strict=false"]),
