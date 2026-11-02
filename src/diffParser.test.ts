@@ -32,6 +32,25 @@ test("parseUnifiedDiff decodes Git-quoted modification paths", () => {
   }]);
 });
 
+test("parseUnifiedDiff deterministically replaces malformed UTF-8 in quoted paths", () => {
+  const diff = [
+    String.raw`diff --git "a/bad-\377-name.txt" "b/bad-\377-name.txt"`,
+    "index 1234567..89abcde 100644",
+    String.raw`--- "a/bad-\377-name.txt"`,
+    String.raw`+++ "b/bad-\377-name.txt"`,
+    "@@ -1 +1 @@",
+    "-before",
+    "+after"
+   ].join("\n");
+
+  assert.deepEqual(parseUnifiedDiff(diff), [{
+    path: "bad-\uFFFD-name.txt",
+    status: "modified",
+    additions: 1,
+    deletions: 1
+  }]);
+});
+
 test("parseUnifiedDiff counts hunk content lines beginning with -- or ++", () => {
   const diff = [
     "diff --git a/t.md b/t.md",
