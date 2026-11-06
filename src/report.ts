@@ -67,3 +67,15 @@ export function renderMarkdown(report: DiffBudgetReport): string {
   lines.push("");
   return `${lines.join("\n")}\n`;
 }
+
+export function renderSarif(report: DiffBudgetReport): string {
+  const rules = [...new Set(report.files.flatMap((entry) => entry.reasons))].sort();
+  const ruleIds = new Map(rules.map((rule, index) => [rule, `DB${String(index + 1).padStart(3, "0")}`]));
+  const results = report.files.flatMap((entry) => entry.reasons.map((reason) => ({
+    ruleId: ruleIds.get(reason)!,
+    level: entry.score >= report.budgets.maxRiskScore ? "error" : "warning",
+    message: { text: reason },
+    locations: [{ physicalLocation: { artifactLocation: { uri: entry.file.path.replaceAll("\\", "/") } } }]
+  })));
+  return `${JSON.stringify({ $schema: "https://json.schemastore.org/sarif-2.1.0.json", version: "2.1.0", runs: [{ tool: { driver: { name: "DiffBudget", version: report.version, rules: rules.map((rule) => ({ id: ruleIds.get(rule), shortDescription: { text: rule } })) } }, results }] }, null, 2)}\n`;
+}
