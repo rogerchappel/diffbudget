@@ -5,13 +5,13 @@ import { loadConfig, writeDefaultConfig } from "./config.js";
 import { diffFromGit, isGitRepo } from "./git.js";
 import { readDiffFile, writeReportFiles, writeTextFile } from "./io.js";
 import { parseUnifiedDiff } from "./diffParser.js";
-import { buildReport, renderMarkdown } from "./report.js";
+import { buildReport, renderMarkdown, renderSarif } from "./report.js";
 import { oneLineSummary } from "./summary.js";
 
 export const VERSION = "0.1.0";
 
 export function helpText(): string {
-  return `DiffBudget — local patch risk budgets before a commit escapes\n\nUsage:\n  diffbudget init [--force]\n  diffbudget scan [--base HEAD] [--target main] [--diff file.patch] [--config file] [--output .diffbudget/latest] [--format markdown|json] [--strict] [--overwrite]\n  diffbudget report [--input .diffbudget/latest/diffbudget-report.json] [--format markdown|json]\n  diffbudget doctor\n\nScan semantics:\n  Without --target, scan tracked changes against --base plus non-ignored untracked files.\n  With --target, scan only the committed --base..--target range. The output directory is excluded.\n\nExamples:\n  diffbudget init\n  diffbudget scan --base HEAD --strict\n  diffbudget scan --diff fixtures/simple-risk/sample.diff --output .diffbudget/sample
+  return `DiffBudget — local patch risk budgets before a commit escapes\n\nUsage:\n  diffbudget init [--force]\n  diffbudget scan [--base HEAD] [--target main] [--diff file.patch] [--config file] [--output .diffbudget/latest] [--format markdown|json|sarif] [--strict] [--overwrite]\n  diffbudget report [--input .diffbudget/latest/diffbudget-report.json] [--format markdown|json|sarif]\n  diffbudget doctor\n\nScan semantics:\n  Without --target, scan tracked changes against --base plus non-ignored untracked files.\n  With --target, scan only the committed --base..--target range. The output directory is excluded.\n\nExamples:\n  diffbudget init\n  diffbudget scan --base HEAD --strict\n  diffbudget scan --diff fixtures/simple-risk/sample.diff --output .diffbudget/sample
   diffbudget scan --base origin/main --target HEAD --format json\n`;
 }
 
@@ -39,7 +39,7 @@ export async function runCommand(parsed: ParsedArgs, cwd = process.cwd()): Promi
     const report = buildReport({ changes, config, workspace: cwd, source: source.label, version: VERSION });
     const files = await writeReportFiles(report, output, boolFlag(parsed.flags, "overwrite"));
     const format = stringFlag(parsed.flags, "format") ?? "markdown";
-    const stdout = format === "json" ? `${JSON.stringify(report, null, 2)}\n` : renderMarkdown(report);
+    const stdout = format === "json" ? `${JSON.stringify(report, null, 2)}\n` : format === "sarif" ? renderSarif(report) : renderMarkdown(report);
     const summary = `\n${oneLineSummary(report)}\nWrote ${files.json}\nWrote ${files.markdown}\n`;
     const strict = boolFlag(parsed.flags, "strict");
     return { code: strict && report.status === "fail" ? 2 : 0, stdout: `${stdout}${summary}`, stderr: "" };
@@ -50,7 +50,7 @@ export async function runCommand(parsed: ParsedArgs, cwd = process.cwd()): Promi
     const report = JSON.parse(await readFile(input, "utf8"));
     const format = stringFlag(parsed.flags, "format") ?? "markdown";
     const out = stringFlag(parsed.flags, "output");
-    const body = format === "json" ? `${JSON.stringify(report, null, 2)}\n` : renderMarkdown(report);
+    const body = format === "json" ? `${JSON.stringify(report, null, 2)}\n` : format === "sarif" ? renderSarif(report) : renderMarkdown(report);
     if (out) await writeTextFile(out, body);
     return { code: 0, stdout: out ? `Wrote ${out}\n` : body, stderr: "" };
   }
