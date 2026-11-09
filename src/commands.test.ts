@@ -33,10 +33,14 @@ test("runCommand reports logical paths from a real Git diff", async () => {
     await mkdir(join(dir, "test"));
     await writeFile(join(dir, tabPath), "before\n");
     await writeFile(join(dir, "old name.txt"), "rename me\n");
+    await writeFile(join(dir, "deleted.txt"), "remove me\n");
     git(["add", "."]);
     git(["commit", "--quiet", "-m", "base"]);
 
     await writeFile(join(dir, tabPath), "after\n");
+    await writeFile(join(dir, "added.txt"), "new\n");
+    await writeFile(join(dir, "binary.dat"), Uint8Array.from([0, 1, 2, 3]));
+    await rm(join(dir, "deleted.txt"));
     await rename(join(dir, "old name.txt"), join(dir, renamedPath));
     git(["add", "-A"]);
     git(["commit", "--quiet", "-m", "change"]);
@@ -48,17 +52,19 @@ test("runCommand reports logical paths from a real Git diff", async () => {
       "--output", join(dir, "report"),
       "--format", "json"
     ]), dir);
-    const report = JSON.parse(await readFile(join(dir, "report", "diffbudget-report.json"), "utf8"));
+    const report = JSON.parse(await readFile(join(dir, "report", "diffbudget-report.json"), "utf8")) as {
+      files: Array<{ file: { path: string; oldPath?: string; status: string; additions: number; deletions: number } }>;
+    };
 
     assert.equal(result.code, 0);
-    assert.deepEqual(report.files.map(({ file }: { file: { path: string } }) => file.path), [
-      tabPath,
-      renamedPath
-    ]);
-    assert.equal(report.files[0].file.additions, 1);
-    assert.equal(report.files[0].file.deletions, 1);
-    assert.equal(report.files[1].file.oldPath, "old name.txt");
-    assert.equal(report.files[1].file.status, "renamed");
+    const files = new Map(report.files.map(({ file }) => [file.path, file]));
+    assert.deepEqual([...files.keys()].sort(), ["added.txt", "binary.dat", "deleted.txt", tabPath, renamedPath].sort());
+    assert.deepEqual(files.get("added.txt"), { path: "added.txt", status: "added", additions: 1, deletions: 0 });
+    assert.deepEqual(files.get("binary.dat"), { path: "binary.dat", status: "binary", additions: 0, deletions: 0, binary: true });
+    assert.deepEqual(files.get("deleted.txt"), { path: "deleted.txt", status: "deleted", additions: 0, deletions: 1 });
+    assert.deepEqual(files.get(tabPath), { path: tabPath, status: "modified", additions: 1, deletions: 1 });
+    assert.equal(files.get(renamedPath)?.status, "renamed");
+    assert.equal(files.get(renamedPath)?.oldPath, "old name.txt");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
