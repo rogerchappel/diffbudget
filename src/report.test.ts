@@ -39,3 +39,20 @@ test("buildReport honors redaction settings", () => {
   assert.match(secretsOnly.workspace, /token=\[REDACTED\]/);
   if (process.env.HOME) assert.match(secretsOnly.workspace, new RegExp(`^${process.env.HOME.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
 });
+
+test("renderSarif emits SARIF 2.1.0 results with rule and file locations", async () => {
+  const { renderSarif } = await import("./report.js");
+  const report = buildReport({
+    changes: [{ path: "src/security/policy.ts", status: "modified", additions: 100, deletions: 5 }],
+    config: DEFAULT_CONFIG,
+    workspace: "/tmp/example",
+    source: "fixture.diff",
+    version: "0.0.0-test",
+    now: new Date("2026-01-01T00:00:00Z")
+  });
+  const sarif = JSON.parse(renderSarif(report));
+  assert.equal(sarif.version, "2.1.0");
+  assert.equal(sarif.runs[0].tool.driver.name, "DiffBudget");
+  assert.ok(sarif.runs[0].tool.driver.rules.length > 0);
+  assert.ok(sarif.runs[0].results.some((result: { locations: { physicalLocation: { artifactLocation: { uri: string } } }[] }) => result.locations[0]?.physicalLocation.artifactLocation.uri === "src/security/policy.ts"));
+});

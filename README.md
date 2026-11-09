@@ -82,12 +82,12 @@ cat .diffbudget/latest/diffbudget-report.md
 ## CLI options
 
 - `init`: `--force`
-- `scan`: `--base`, `--target`, `--diff`, `--config`, `--output`, `--format markdown|json`, `--strict`, `--overwrite`
-- `report`: `--input`, `--output`, `--format markdown|json`
+- `scan`: `--base`, `--target`, `--diff`, `--config`, `--output`, `--format markdown|json|sarif`, `--strict`, `--overwrite`
+- `report`: `--input`, `--output`, `--format markdown|json|sarif`
 - `doctor`: `--config`
 
 Boolean options (`--force` and `--strict`) do not take values. Unknown options,
-missing values, and formats other than `markdown` or `json` exit with an error.
+missing values, and formats other than `markdown`, `json`, or `sarif` exit with an error. SARIF output uses version 2.1.0 with rule descriptors and file locations.
 
 Tune budgets in `diffbudget.config.json`:
 

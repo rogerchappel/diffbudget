@@ -70,8 +70,8 @@ export function parseArgs(argv: string[]): ParsedArgs {
     if (inlineValue === undefined) {
       index += 1;
     }
-    if (kind === "format" && value !== "markdown" && value !== "json") {
-      throw new Error(`Invalid value for --format: ${value} (expected markdown or json)`);
+    if (kind === "format" && value !== "markdown" && value !== "json" && value !== "sarif") {
+      throw new Error(`Invalid value for --format: ${value} (expected markdown, json, or sarif)`);
     }
     flags[key] = value;
   }

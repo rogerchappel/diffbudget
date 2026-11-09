@@ -52,7 +52,7 @@ test("parseArgs rejects unknown options with the command name", () => {
 test("parseArgs rejects unsupported output formats", () => {
   assert.throws(
     () => parseArgs(["scan", "--format", "yaml"]),
-    /Invalid value for --format: yaml \(expected markdown or json\)/
+    /Invalid value for --format: yaml \(expected markdown, json, or sarif\)/
   );
 });
 
