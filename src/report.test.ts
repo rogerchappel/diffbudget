@@ -17,3 +17,25 @@ test("buildReport produces deterministic totals with injected date", () => {
   assert.equal(report.files[0]?.tags.includes("risky-path"), true);
   assert.match(renderMarkdown(report), /DiffBudget Report/);
 });
+
+test("buildReport honors redaction settings", () => {
+  const workspace = `${process.env.HOME ?? "/home/example"}/project-token=visible`;
+  const report = buildReport({
+    changes: [],
+    config: { ...DEFAULT_CONFIG, redaction: { enabled: false, redactHome: false } },
+    workspace,
+    source: "fixture.diff",
+    version: "0.0.0-test"
+  });
+  assert.equal(report.workspace, workspace);
+
+  const secretsOnly = buildReport({
+    changes: [],
+    config: { ...DEFAULT_CONFIG, redaction: { enabled: true, redactHome: false } },
+    workspace,
+    source: "fixture.diff",
+    version: "0.0.0-test"
+  });
+  assert.match(secretsOnly.workspace, /token=\[REDACTED\]/);
+  if (process.env.HOME) assert.match(secretsOnly.workspace, new RegExp(`^${process.env.HOME.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+});
