@@ -142,6 +142,10 @@ DiffBudget is local-first:
 
 ## Verify
 
+Releases require a stable `vX.Y.Z` Git tag that exactly matches the version in
+`package.json` (for example, package version `0.1.0` requires tag `v0.1.0`). The
+release workflow checks this before building or attaching package artifacts.
+
 ```sh
 npm test
 npm run check
@@ -150,6 +154,7 @@ npm run smoke
 npm run install:smoke
 npm run package:smoke
 npm run release:check
+npm run release:tag-check -- v0.1.0
 bash scripts/validate.sh
 ```
 

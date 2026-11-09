@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -37,6 +36,8 @@ jobs:
         run: node /tmp/releasebox/bin/releasebox.js check .
       - name: Run release checks
         run: npm run release:check
+      - name: Validate release tag
+        run: npm run release:tag-check -- "${GITHUB_REF_NAME}"
       - name: Build package
         run: npm pack
       - name: Generate release notes
