@@ -217,7 +217,8 @@ test("runCommand includes reviewable untracked files in worktree scans", async (
         "scan",
         "--base", "HEAD",
         "--output", output,
-        "--format", "json"
+        "--format", "json",
+        "--overwrite"
       ]), dir);
       assert.equal(result.code, 0);
       return JSON.parse(await readFile(join(output, "diffbudget-report.json"), "utf8")) as {
@@ -239,6 +240,30 @@ test("runCommand includes reviewable untracked files in worktree scans", async (
     assert.equal(files.get("binary.dat")?.binary, true);
     assert.equal(files.has("ignored.txt"), false);
     assert.equal([...files.keys()].some((path) => path.startsWith("scan-output/")), false);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("scan refuses to overwrite either existing report and preserves its contents", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "diffbudget-existing-output-"));
+  const output = join(dir, "out");
+  const fixture = join(process.cwd(), "fixtures/simple-risk/sample.diff");
+  try {
+    await mkdir(output);
+    const json = join(output, "diffbudget-report.json");
+    const markdown = join(output, "diffbudget-report.md");
+    await writeFile(json, "keep json\n");
+    await writeFile(markdown, "keep markdown\n");
+    await assert.rejects(
+      runCommand(parseArgs(["scan", "--diff", fixture, "--output", output]), dir),
+      /Refusing to overwrite existing report file/);
+    assert.equal(await readFile(json, "utf8"), "keep json\n");
+    assert.equal(await readFile(markdown, "utf8"), "keep markdown\n");
+    const overwrite = await runCommand(parseArgs(["scan", "--diff", fixture, "--output", output, "--overwrite"]), dir);
+    assert.equal(overwrite.code, 0);
+    assert.notEqual(await readFile(json, "utf8"), "keep json\n");
+    assert.notEqual(await readFile(markdown, "utf8"), "keep markdown\n");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
