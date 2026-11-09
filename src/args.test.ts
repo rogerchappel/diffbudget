@@ -66,3 +66,31 @@ test("parseArgs rejects values supplied to boolean options", () => {
     /Option --strict does not accept a value/
   );
 });
+
+test("parseArgs rejects unexpected positional arguments", () => {
+  for (const command of ["init", "scan", "report", "doctor"]) {
+    assert.throws(
+      () => parseArgs([command, "unexpected"]),
+      new RegExp(`Unexpected positional argument for ${command}: unexpected`)
+    );
+  }
+});
+
+test("parseArgs rejects repeated options in space-separated and inline forms", () => {
+  assert.throws(
+    () => parseArgs(["scan", "--diff", "first.patch", "--diff", "second.patch"]),
+    /Option --diff may only be specified once/
+  );
+  assert.throws(
+    () => parseArgs(["scan", "--output=first", "--output=second"]),
+    /Option --output may only be specified once/
+  );
+  assert.throws(
+    () => parseArgs(["scan", "--format", "json", "--format=markdown"]),
+    /Option --format may only be specified once/
+  );
+  assert.throws(
+    () => parseArgs(["init", "--force", "--force"]),
+    /Option --force may only be specified once/
+  );
+});

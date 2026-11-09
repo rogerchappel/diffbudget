@@ -1,11 +1,35 @@
-import { execFileSync } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { execFileSync, spawnSync } from "node:child_process";
+import { access, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseArgs } from "./args.js";
 import { runCommand } from "./commands.js";
+
+test("CLI rejects invalid argument shapes before creating output", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "diffbudget-cli-args-"));
+  const output = join(dir, "out");
+  const fixture = join(process.cwd(), "fixtures/simple-risk/sample.diff");
+
+  try {
+    for (const args of [
+      ["scan", "unexpected", "--diff", fixture, "--output", output],
+      ["scan", "--diff", fixture, "--diff", fixture, "--output", output],
+      ["scan", `--diff=${fixture}`, `--diff=${fixture}`, `--output=${output}`]
+    ]) {
+      const result = spawnSync(process.execPath, [join(process.cwd(), "dist/cli.js"), ...args], {
+        cwd: dir,
+        encoding: "utf8"
+      });
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /Unexpected positional argument|may only be specified once/);
+      await assert.rejects(access(output));
+    }
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
 
 test("runCommand scans a fixture diff", async () => {
   const dir = await mkdtemp(join(tmpdir(), "diffbudget-command-"));
