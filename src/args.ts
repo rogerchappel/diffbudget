@@ -26,6 +26,8 @@ const COMMAND_OPTIONS: Record<string, Record<string, OptionKind>> = {
   "-h": {}
 };
 
+const COMMANDS_WITHOUT_POSITIONALS = new Set(["init", "scan", "report", "doctor"]);
+
 export function parseArgs(argv: string[]): ParsedArgs {
   const [command = "help", ...tail] = argv;
   const options = COMMAND_OPTIONS[command] ?? {};
@@ -34,6 +36,9 @@ export function parseArgs(argv: string[]): ParsedArgs {
   for (let index = 0; index < tail.length; index += 1) {
     const token = tail[index];
     if (!token.startsWith("--")) {
+      if (COMMANDS_WITHOUT_POSITIONALS.has(command)) {
+        throw new Error(`Unexpected positional argument for ${command}: ${token}`);
+      }
       rest.push(token);
       continue;
     }
@@ -44,6 +49,9 @@ export function parseArgs(argv: string[]): ParsedArgs {
     const kind = options[key];
     if (!kind) {
       throw new Error(`Unknown option for ${command}: --${key}`);
+    }
+    if (Object.hasOwn(flags, key)) {
+      throw new Error(`Option --${key} may only be specified once`);
     }
     if (kind === "boolean") {
       if (inlineValue !== undefined || (tail[index + 1] && !tail[index + 1].startsWith("--"))) {
