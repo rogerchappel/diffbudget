@@ -172,6 +172,7 @@ Keep changes small, local-first, and fixture-backed. See [CONTRIBUTING.md](CONTR
 Use Node.js 20 or newer. Run these checks before opening a PR:
 
 ```sh
+npm run audit:dependencies
 npm run build
 npm run check
 npm test
