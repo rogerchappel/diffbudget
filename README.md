@@ -6,15 +6,21 @@ DiffBudget reads a git diff, scores the patch against plain local budgets, and w
 
 ## Install
 
+DiffBudget is not currently published to the npm registry. Install the current
+source directly from GitHub:
+
 ```sh
-npm install -D diffbudget
-npx diffbudget --version
+npm install -D github:rogerchappel/diffbudget#main
+npx --no-install diffbudget --version
 ```
 
-From a checkout of this repository:
+The `prepare` script builds the CLI during installation. Pin a commit SHA
+instead of `main` when you need a reproducible dependency.
+
+For local development from a checkout of this repository:
 
 ```sh
-npm install
+npm ci
 npm run build
 node dist/cli.js --help
 ```
@@ -22,20 +28,20 @@ node dist/cli.js --help
 ## Quickstart
 
 ```sh
-# create diffbudget.config.json
-npx diffbudget init
+# create diffbudget.config.json (after installing as above)
+npx --no-install diffbudget init
 
 # score uncommitted changes against HEAD
-npx diffbudget scan --base HEAD --output .diffbudget/latest
+npx --no-install diffbudget scan --base HEAD --output .diffbudget/latest
 
 # short alias for the same CLI
-npx dbudget scan --base HEAD --output .diffbudget/latest
+npx --no-install dbudget scan --base HEAD --output .diffbudget/latest
 
 # fail with exit code 2 when the patch exceeds budget
-npx diffbudget scan --base HEAD --strict
+npx --no-install diffbudget scan --base HEAD --strict
 
 # render an existing JSON report
-npx diffbudget report --input .diffbudget/latest/diffbudget-report.json
+npx --no-install diffbudget report --input .diffbudget/latest/diffbudget-report.json
 ```
 
 ## Practical examples
@@ -126,6 +132,7 @@ npm test
 npm run check
 npm run build
 npm run smoke
+npm run install:smoke
 npm run package:smoke
 npm run release:check
 bash scripts/validate.sh
@@ -144,6 +151,7 @@ npm run build
 npm run check
 npm test
 npm run smoke
+npm run install:smoke
 npm run package:smoke
 npm run release:check
 ```
