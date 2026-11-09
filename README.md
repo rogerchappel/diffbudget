@@ -55,7 +55,7 @@ Or run the fixture-backed demo script:
 bash demo/run-fixture-risk-scan.sh
 ```
 
-The tutorial in [docs/tutorials/agent-risk-gate.md](docs/tutorials/agent-risk-gate.md) shows how to use the generated Markdown and JSON reports in an agent handoff. Promotion hooks are in [docs/promo/social-hooks.md](docs/promo/social-hooks.md).
+The tutorial in [docs/tutorials/agent-risk-gate.md](docs/tutorials/agent-risk-gate.md) shows how to use the generated Markdown and JSON reports in an agent handoff. Promotion hooks are in [docs/promo/social-hooks.md](docs/promo/social-hooks.md), and a recording outline is in [docs/promo/video-brief-fixture-risk-gate.md](docs/promo/video-brief-fixture-risk-gate.md).
 
 Use in an agent handoff:
 
