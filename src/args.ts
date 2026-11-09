@@ -15,7 +15,8 @@ const COMMAND_OPTIONS: Record<string, Record<string, OptionKind>> = {
     config: "string",
     output: "string",
     format: "format",
-    strict: "boolean"
+    strict: "boolean",
+    overwrite: "boolean"
   },
   report: { input: "string", output: "string", format: "format" },
   doctor: { config: "string" },
