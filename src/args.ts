@@ -4,8 +4,31 @@ export interface ParsedArgs {
   rest: string[];
 }
 
+type OptionKind = "boolean" | "string" | "format";
+
+const COMMAND_OPTIONS: Record<string, Record<string, OptionKind>> = {
+  init: { force: "boolean" },
+  scan: {
+    base: "string",
+    target: "string",
+    diff: "string",
+    config: "string",
+    output: "string",
+    format: "format",
+    strict: "boolean"
+  },
+  report: { input: "string", output: "string", format: "format" },
+  doctor: { config: "string" },
+  help: {},
+  version: {},
+  "--help": {},
+  "--version": {},
+  "-h": {}
+};
+
 export function parseArgs(argv: string[]): ParsedArgs {
   const [command = "help", ...tail] = argv;
+  const options = COMMAND_OPTIONS[command] ?? {};
   const flags: Record<string, string | boolean> = {};
   const rest: string[] = [];
   for (let index = 0; index < tail.length; index += 1) {
@@ -15,18 +38,31 @@ export function parseArgs(argv: string[]): ParsedArgs {
       continue;
     }
     const withoutPrefix = token.slice(2);
-    const [key, inlineValue] = withoutPrefix.split(/=(.*)/s).filter(Boolean);
-    if (inlineValue !== undefined) {
-      flags[key] = inlineValue;
+    const equalsIndex = withoutPrefix.indexOf("=");
+    const key = equalsIndex === -1 ? withoutPrefix : withoutPrefix.slice(0, equalsIndex);
+    const inlineValue = equalsIndex === -1 ? undefined : withoutPrefix.slice(equalsIndex + 1);
+    const kind = options[key];
+    if (!kind) {
+      throw new Error(`Unknown option for ${command}: --${key}`);
+    }
+    if (kind === "boolean") {
+      if (inlineValue !== undefined || (tail[index + 1] && !tail[index + 1].startsWith("--"))) {
+        throw new Error(`Option --${key} does not accept a value`);
+      }
+      flags[key] = true;
       continue;
     }
-    const next = tail[index + 1];
-    if (next && !next.startsWith("--")) {
-      flags[key] = next;
-      index += 1;
-    } else {
-      flags[key] = true;
+    const value = inlineValue ?? tail[index + 1];
+    if (value === undefined || value === "" || (inlineValue === undefined && value.startsWith("--"))) {
+      throw new Error(`Option --${key} requires a value`);
     }
+    if (inlineValue === undefined) {
+      index += 1;
+    }
+    if (kind === "format" && value !== "markdown" && value !== "json") {
+      throw new Error(`Invalid value for --format: ${value} (expected markdown or json)`);
+    }
+    flags[key] = value;
   }
   return { command, flags, rest };
 }
