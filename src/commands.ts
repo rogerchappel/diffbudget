@@ -33,10 +33,10 @@ export async function runCommand(parsed: ParsedArgs, cwd = process.cwd()): Promi
   if (parsed.command === "scan") {
     const { config } = await loadConfig(cwd, stringFlag(parsed.flags, "config"));
     const diffPath = stringFlag(parsed.flags, "diff");
-    const source = diffPath ? await readDiffFile(diffPath) : await diffFromGit(cwd, stringFlag(parsed.flags, "base") ?? "HEAD", stringFlag(parsed.flags, "target"));
+    const output = stringFlag(parsed.flags, "output") ?? join(cwd, ".diffbudget", "latest");
+    const source = diffPath ? await readDiffFile(diffPath) : await diffFromGit(cwd, stringFlag(parsed.flags, "base") ?? "HEAD", stringFlag(parsed.flags, "target"), output);
     const changes = parseUnifiedDiff(source.text);
     const report = buildReport({ changes, config, workspace: cwd, source: source.label, version: VERSION });
-    const output = stringFlag(parsed.flags, "output") ?? join(cwd, ".diffbudget", "latest");
     const files = await writeReportFiles(report, output);
     const format = stringFlag(parsed.flags, "format") ?? "markdown";
     const stdout = format === "json" ? `${JSON.stringify(report, null, 2)}\n` : renderMarkdown(report);
