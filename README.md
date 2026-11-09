@@ -48,7 +48,9 @@ Without `--target`, a Git-backed scan combines staged and unstaged tracked
 changes against `--base` with every non-ignored untracked file. Text content
 and line counts contribute to risk normally; binary and empty untracked files
 still contribute to the changed-file count. Git-ignored files and the selected
-report output directory are excluded. With `--target`, the scan is strictly the
+report output directory are excluded. Existing report files are preserved and cause
+an error by default; pass `--overwrite` to intentionally replace both generated
+reports. With `--target`, the scan is strictly the
 committed `--base..--target` range and does not inspect working-tree files.
 
 ## Practical examples
@@ -80,7 +82,7 @@ cat .diffbudget/latest/diffbudget-report.md
 ## CLI options
 
 - `init`: `--force`
-- `scan`: `--base`, `--target`, `--diff`, `--config`, `--output`, `--format markdown|json`, `--strict`
+- `scan`: `--base`, `--target`, `--diff`, `--config`, `--output`, `--format markdown|json`, `--strict`, `--overwrite`
 - `report`: `--input`, `--output`, `--format markdown|json`
 - `doctor`: `--config`
 
