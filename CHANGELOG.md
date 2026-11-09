@@ -13,6 +13,8 @@ format and uses semantic versioning when versioned releases are published.
 
 ### Fixed
 
+- Preserve unquoted Git paths containing the separator-like substring ` b/`
+  when parsing diff headers.
 - Count hunk content lines beginning with `--` or `++` (for example deleted `-- x`/`--- x` or added `++ x`/`+++ x` lines) so scan additions/deletions and the changed-lines/risk budget gates are accurate.
 - Decode Git-quoted modification and rename paths so scans, path patterns, and
   reports use the actual filename.
