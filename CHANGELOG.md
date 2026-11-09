@@ -11,6 +11,11 @@ format and uses semantic versioning when versioned releases are published.
 
 - Initial project setup.
 
+### Fixed
+
+- Decode Git-quoted modification and rename paths so scans, path patterns, and
+  reports use the actual filename.
+
 ## Release Links
 
 - Unreleased:
