@@ -63,6 +63,36 @@ test("runCommand scans a fixture diff", async () => {
   }
 });
 
+test("runCommand scan totals count dashed/plus-prefixed hunk content", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "diffbudget-dash-hunks-"));
+  try {
+    const probe = join(dir, "probe.diff");
+    await writeFile(probe, [
+      "diff --git a/t.md b/t.md",
+      "index 1234567..89abcde 100644",
+      "--- a/t.md",
+      "+++ b/t.md",
+      "@@ -1,5 +1,5 @@",
+      " keep",
+      "--- dashed",
+      "-++ plus",
+      "---- triple",
+      " keep2",
+      "+-- dashed2",
+      "+++ plus2",
+      "+--- triple2"
+    ].join("\n"));
+    const result = await runCommand(parseArgs(["scan", "--diff", probe, "--output", join(dir, "out"), "--format", "json"]), dir);
+    const report = JSON.parse(await readFile(join(dir, "out", "diffbudget-report.json"), "utf8")) as { totals: { additions: number; deletions: number; changedLines: number } };
+    assert.equal(result.code, 0);
+    assert.equal(report.totals.additions, 3);
+    assert.equal(report.totals.deletions, 3);
+    assert.equal(report.totals.changedLines, 6);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("runCommand reports logical paths from a real Git diff", async () => {
   const dir = await mkdtemp(join(tmpdir(), "diffbudget-git-paths-"));
   const tabPath = "src/tab\tname.ts";
