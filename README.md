@@ -98,7 +98,9 @@ Tune budgets in `diffbudget.config.json`:
 
 Config sections are optional and merge with the defaults. Supplied budgets and
 weights must be finite non-negative numbers, patterns must be arrays of strings,
-and redaction settings must be booleans. See
+and redaction settings must be booleans. Unknown root or nested keys are
+rejected with their full path, so configuration misspellings cannot silently
+fall back to defaults. See
 [docs/CONFIG.md](docs/CONFIG.md) for the complete constraints and redaction
 behavior.
 
