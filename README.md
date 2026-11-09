@@ -146,6 +146,9 @@ Releases require a stable `vX.Y.Z` Git tag that exactly matches the version in
 `package.json` (for example, package version `0.1.0` requires tag `v0.1.0`). The
 release workflow checks this before building or attaching package artifacts.
 
+The package smoke check rejects compiled test artifacts, verifies every runtime
+module and declaration, installs the tarball, and exercises its CLI and import.
+
 ```sh
 npm test
 npm run check
